@@ -8,7 +8,7 @@ exports.postUser = async (req, res, next) => {
     const mail = req.body.mail
     const password = req.body.password
 
-    let userExists = await User.findOne({ where: { mail: mail } });
+    let userExists = await User.find({ mail: mail });
     if (userExists) {
       console.log(userExists)
       return res.status(400).json({ message: "Email already exists" });
