@@ -16,6 +16,7 @@ const userSchema = new Schema({
     },
     isPremium:{
       type:Boolean, 
+      default:false,
     },
     totalExp:{
       type:Number,

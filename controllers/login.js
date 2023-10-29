@@ -6,7 +6,7 @@ exports.checkUser = async (req, res, next) => {
     try {
         const mail = req.body.mail
         const password = req.body.password
-        const user = await User.find({ mail: mail })
+        const user = await User.findOne({ mail: mail })
 
         if (user) {
             bcrypt.compare(password, user.password, (err, result) => {

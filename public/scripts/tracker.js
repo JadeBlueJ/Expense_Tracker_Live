@@ -25,7 +25,7 @@ const ul = document.getElementById('archives')
 const userDetails = localStorage.getItem('token')
 if (!userDetails) {
     alert("Please login/Signup first!")
-    window.location.href = '../public/login.html'
+    window.location.href = './login.html'
 }
 
 let itemsPerPage = 5;
@@ -94,12 +94,12 @@ function logout(e) {
     localStorage.removeItem('token')
     localStorage.removeItem('userDetails')
     // alert("Logged out successfully")
-    window.location.href = '../public/login.html'
+    window.location.href = '../login.html'
     document.body.innerHTML += '<div style = "color:red">Logged Out successfully</div>'
 }
 
-function getval(event) {
-    alert("The form has been submitted");
+async function getval(event) {
+    // alert("The form has been submitted");
     var amount = event.target.amt.value;
     var description = event.target.descr.value;
     var category = event.target.cat.value;
@@ -120,6 +120,13 @@ window.addEventListener("DOMContentLoaded", async (e) => {
         .then(val => {
             const expenses = val.data.allExp;
             priceval.innerHTML = `Rs. ${val.data.user.totalExp}`
+            if (val.data.user.isPremium) {
+                rzpbtn.innerHTML = "Premium Membership Active"
+                rzpbtn.classList = "btn btn-info btn-lg shadow"
+                rzpbtn.onclick = null
+                leaderbtn.classList = "btn btn-outline-primary btn-lg shadow text-bg-warning"
+                reportbtn.classList = "btn btn-outline-primary btn-lg shadow text-bg-warning"
+            }
             // console.log(val.data.user)
             setupPagination(expenses);
             displayTableItems(expenses, currentPage);
@@ -129,18 +136,18 @@ window.addEventListener("DOMContentLoaded", async (e) => {
 
         })
         .catch(e => console.log(e))
-    axios.get('http://localhost:3000/purchase/premiumStatus', { headers: { "authorization": token } }).then(response => {
-        // console.log(response)
-        const isPremium = response.data.isPremium
-        if (isPremium) {
-            rzpbtn.innerHTML = "Premium Membership Active"
-            rzpbtn.classList = "btn btn-info btn-lg shadow"
-            rzpbtn.onclick = null
-            leaderbtn.classList = "btn btn-outline-primary btn-lg shadow text-bg-warning"
-            reportbtn.classList = "btn btn-outline-primary btn-lg shadow text-bg-warning"
+    // axios.get('http://localhost:3000/purchase/premiumStatus', { headers: { "authorization": token } }).then(response => {
+    //     // console.log(response)
+    //     const isPremium = response.data.isPremium
+    //     if (isPremium) {
+    //         rzpbtn.innerHTML = "Premium Membership Active"
+    //         rzpbtn.classList = "btn btn-info btn-lg shadow"
+    //         rzpbtn.onclick = null
+    //         leaderbtn.classList = "btn btn-outline-primary btn-lg shadow text-bg-warning"
+    //         reportbtn.classList = "btn btn-outline-primary btn-lg shadow text-bg-warning"
 
-        }
-    })
+    //     }
+    // })
     axios.get('http://localhost:3000/user/archive', { headers: { "authorization": token } }).then(archives => {
         // console.log(archives)
         archives.data.allDl.forEach(archive => {
@@ -405,7 +412,7 @@ function ldb(ob) {
 function UIelement(ob) {
     // Create a new row element
     var row = document.createElement('tr');
-    row.id = ob.id
+    row.id = ob._id
 
     // Add cells for each property
     var amountCell = document.createElement('td');
@@ -431,10 +438,23 @@ function UIelement(ob) {
     deleteButton.addEventListener('click', function () {
         if (confirm('delete me?')) {
             //   sum -= parseInt(ob.amount);
-            axios.delete(`http://localhost:3000/expense/delete-expense/${ob.id}`, { headers: { "authorization": token } })
+            axios.delete(`http://localhost:3000/expense/delete-expense/${ob._id}`, { headers: { "authorization": token } })
                 .then(val => {
                     // console.log(val.data)
-                    row.remove()
+                    axios.get('http://localhost:3000/expense/get-expense', { headers: { "authorization": token } })
+                        .then(val => {
+                            const expenses = val.data.allExp;
+                            priceval.innerHTML = `Rs. ${val.data.user.totalExp}`
+                            // console.log(val.data.user)
+                            setupPagination(expenses);
+                            currentPage = 1;
+                            displayTableItems(expenses, currentPage);
+                            //     val.data.allExp.forEach(item => {
+                            //         UIelement(item);
+                            // })
+
+                        })
+                        .catch(e => console.log(e))
                     priceval.innerHTML = `Rs. ${val.data.user.totalExp}`;
                 });
         }

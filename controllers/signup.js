@@ -4,11 +4,11 @@ const bcrypt = require('bcrypt')
 
 exports.postUser = async (req, res, next) => {
   try {
+    console.log(`req: ${req}`)
     const name = req.body.name
     const mail = req.body.mail
     const password = req.body.password
-
-    let userExists = await User.find({ mail: mail });
+    let userExists = await User.findOne({ mail: mail });
     if (userExists) {
       console.log(userExists)
       return res.status(400).json({ message: "Email already exists" });
